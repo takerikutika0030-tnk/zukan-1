@@ -3,156 +3,204 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>みどりの図鑑 — My Plant Journal</title>
+<title>みどりの図鑑</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  :root {
-    --ink: #1a1a14; --paper: #f5f0e8; --moss: #4a6741;
-    --moss-light: #7a9e6e; --cream: #ede8d8; --gold: #c8a84b;
-    --mist: #d4ddd0; --accent: #e07b54;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Zen Kaku Gothic New', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; overflow-x: hidden; }
-  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:9999; opacity:.4; }
+:root {
+  --ink:#1a1a14; --paper:#f5f0e8; --moss:#4a6741; --moss-light:#7a9e6e;
+  --cream:#ede8d8; --gold:#c8a84b; --mist:#d4ddd0; --accent:#e07b54;
+  --sidebar:320px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4;}
 
-  header { background:var(--moss); color:var(--paper); padding:18px 32px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 2px 20px rgba(0,0,0,.25); }
-  .logo { font-family:'Shippori Mincho',serif; font-size:1.5rem; font-weight:800; letter-spacing:.06em; }
-  .logo span { color:var(--gold); }
-  .logo-sub { font-family:'DM Mono',monospace; font-size:.65rem; letter-spacing:.2em; opacity:.7; margin-top:2px; }
-  .header-right { display:flex; align-items:center; gap:14px; }
-  .header-stats { font-family:'DM Mono',monospace; font-size:.75rem; opacity:.8; }
+/* HEADER */
+header{background:var(--moss);color:var(--paper);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.25);}
+.logo{font-family:'Shippori Mincho',serif;font-size:1.4rem;font-weight:800;letter-spacing:.06em;}
+.logo span{color:var(--gold);}
+.logo-sub{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;opacity:.7;margin-top:1px;}
+.header-actions{display:flex;gap:10px;align-items:center;}
+.hbtn{border:none;border-radius:8px;padding:7px 13px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .15s;}
+.hbtn-gold{background:var(--gold);color:var(--ink);}
+.hbtn-gold:hover{background:#b8943b;}
+.hbtn-outline{background:transparent;color:var(--paper);border:1.5px solid rgba(255,255,255,.4);}
+.hbtn-outline:hover{background:rgba(255,255,255,.1);}
+.hbtn-outline.active{background:rgba(255,255,255,.2);border-color:var(--gold);color:var(--gold);}
 
-  /* JSON Import Button in header */
-  .btn-import {
-    background: var(--gold); color: var(--ink);
-    border: none; border-radius: 8px; padding: 8px 14px;
-    font-family:'Zen Kaku Gothic New',sans-serif; font-size:.78rem; font-weight:700;
-    cursor:pointer; transition:all .15s; white-space:nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,.2);
-  }
-  .btn-import:hover { background:#b8943b; transform:translateY(-1px); }
+/* LAYOUT */
+.app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:calc(100vh - 58px);}
 
-  .app { display:grid; grid-template-columns:380px 1fr; height:calc(100vh - 64px); }
+/* SIDEBAR */
+.sidebar{background:var(--cream);border-right:1px solid var(--mist);display:flex;flex-direction:column;overflow:hidden;}
+.upload-zone{padding:16px;border-bottom:1px solid var(--mist);}
+.drop-area{border:2px dashed var(--moss-light);border-radius:10px;padding:20px 12px;text-align:center;cursor:pointer;transition:all .25s;position:relative;background:rgba(122,158,110,.05);}
+.drop-area:hover,.drop-area.drag-over{border-color:var(--moss);background:rgba(122,158,110,.12);}
+.drop-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+.drop-icon{font-size:1.8rem;margin-bottom:4px;}
+.drop-text{font-size:.8rem;color:var(--moss);font-weight:700;}
+.drop-sub{font-size:.68rem;color:#999;margin-top:2px;}
 
-  /* LEFT */
-  .left-panel { background:var(--cream); border-right:1px solid var(--mist); display:flex; flex-direction:column; overflow:hidden; }
-  .upload-zone { padding:20px; border-bottom:1px solid var(--mist); }
-  .drop-area { border:2px dashed var(--moss-light); border-radius:12px; padding:24px 16px; text-align:center; cursor:pointer; transition:all .25s; position:relative; background:rgba(122,158,110,.05); }
-  .drop-area:hover, .drop-area.drag-over { border-color:var(--moss); background:rgba(122,158,110,.12); transform:scale(1.01); }
-  .drop-area input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; }
-  .drop-icon { font-size:2rem; margin-bottom:6px; }
-  .drop-text { font-size:.85rem; color:var(--moss); font-weight:700; }
-  .drop-sub  { font-size:.72rem; color:#888; margin-top:3px; }
+/* FILTER BAR */
+.filter-bar{padding:10px 16px;border-bottom:1px solid var(--mist);display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.filter-tag{font-size:.68rem;padding:3px 10px;border-radius:20px;border:1.5px solid var(--mist);cursor:pointer;background:white;transition:all .15s;font-weight:600;white-space:nowrap;}
+.filter-tag:hover{border-color:var(--moss-light);}
+.filter-tag.active{background:var(--moss);color:white;border-color:var(--moss);}
+.filter-tag.add-tag{border-style:dashed;color:var(--moss);background:transparent;}
+.filter-tag.add-tag:hover{background:rgba(74,103,65,.08);}
 
-  .entries-header { padding:14px 20px 10px; font-family:'DM Mono',monospace; font-size:.7rem; letter-spacing:.15em; color:#888; text-transform:uppercase; border-bottom:1px solid var(--mist); display:flex; justify-content:space-between; align-items:center; }
-  .entry-count { background:var(--moss); color:white; font-size:.62rem; padding:2px 7px; border-radius:99px; }
-  .entries-list { overflow-y:auto; flex:1; }
-  .entry-card { display:flex; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--mist); cursor:pointer; transition:background .15s; animation:slideIn .3s ease; }
-  @keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:none} }
-  .entry-card:hover { background:rgba(74,103,65,.07); }
-  .entry-card.active { background:rgba(74,103,65,.13); border-left:3px solid var(--moss); }
-  .entry-thumb { width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0; border:2px solid var(--mist); }
-  .entry-info { flex:1; min-width:0; }
-  .entry-name { font-family:'Shippori Mincho',serif; font-size:.92rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .entry-sci  { font-family:'DM Mono',monospace; font-size:.65rem; color:#888; font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .entry-date { font-family:'DM Mono',monospace; font-size:.6rem; color:#aaa; margin-top:3px; }
-  .entry-badge { font-size:.55rem; padding:2px 6px; border-radius:4px; font-weight:700; flex-shrink:0; }
-  .badge-plant { background:#d4edda; color:#276139; }
-  .badge-animal { background:#fff3cd; color:#856404; }
-  .badge-other  { background:#e2e3e5; color:#495057; }
+/* ENTRIES */
+.entries-header{padding:10px 16px 8px;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.15em;color:#888;text-transform:uppercase;border-bottom:1px solid var(--mist);display:flex;justify-content:space-between;align-items:center;}
+.entry-count{background:var(--moss);color:white;font-size:.58rem;padding:2px 7px;border-radius:99px;}
+.entries-list{overflow-y:auto;flex:1;}
+.entry-card{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--mist);cursor:pointer;transition:background .15s;animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+.entry-card:hover{background:rgba(74,103,65,.07);}
+.entry-card.active{background:rgba(74,103,65,.13);border-left:3px solid var(--moss);}
+.entry-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;border:2px solid var(--mist);}
+.entry-info{flex:1;min-width:0;}
+.entry-name{font-family:'Shippori Mincho',serif;font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.entry-sci{font-family:'DM Mono',monospace;font-size:.62rem;color:#888;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.entry-meta{font-family:'DM Mono',monospace;font-size:.58rem;color:#aaa;margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;}
+.entry-tag{font-size:.55rem;padding:1px 6px;border-radius:4px;font-weight:700;}
 
-  /* RIGHT */
-  .right-panel { display:flex; flex-direction:column; overflow:hidden; }
-  #map { flex:1; min-height:0; background:var(--mist); }
-  .detail-drawer { background:white; border-top:2px solid var(--mist); height:0; overflow:hidden; transition:height .35s cubic-bezier(.4,0,.2,1); }
-  .detail-drawer.open { height:280px; overflow-y:auto; }
-  .detail-inner { padding:20px 28px; display:grid; grid-template-columns:160px 1fr; gap:24px; }
-  .detail-photo { width:100%; aspect-ratio:1; border-radius:12px; object-fit:cover; border:3px solid var(--mist); }
-  .detail-name { font-family:'Shippori Mincho',serif; font-size:1.4rem; font-weight:800; line-height:1.2; }
-  .detail-sci  { font-family:'DM Mono',monospace; font-size:.78rem; color:#888; font-style:italic; margin-bottom:10px; }
-  .detail-desc { font-size:.82rem; line-height:1.7; color:#444; margin-bottom:12px; }
-  .detail-meta { display:flex; flex-wrap:wrap; gap:8px; font-family:'DM Mono',monospace; font-size:.68rem; }
-  .meta-chip { background:var(--cream); border:1px solid var(--mist); padding:3px 10px; border-radius:20px; color:#666; }
-  .detail-actions { display:flex; gap:8px; margin-top:12px; }
-  .btn { padding:7px 14px; border:none; border-radius:8px; font-family:'Zen Kaku Gothic New',sans-serif; font-size:.78rem; cursor:pointer; transition:all .15s; font-weight:700; }
-  .btn-edit { background:var(--moss); color:white; }
-  .btn-edit:hover { background:#3a5232; }
-  .btn-del { background:#fee; color:#c0392b; }
-  .btn-del:hover { background:#fcc; }
-  .btn-close { background:var(--cream); color:var(--ink); }
+/* MAIN CONTENT */
+.main{display:flex;flex-direction:column;overflow:hidden;}
 
-  /* MODALS */
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:200; opacity:0; pointer-events:none; transition:opacity .2s; }
-  .modal-overlay.open { opacity:1; pointer-events:all; }
-  .modal { background:white; border-radius:16px; padding:28px; width:480px; max-width:95vw; transform:translateY(20px) scale(.97); transition:transform .25s; box-shadow:0 20px 60px rgba(0,0,0,.25); max-height:90vh; overflow-y:auto; }
-  .modal-overlay.open .modal { transform:none; }
-  .modal-title { font-family:'Shippori Mincho',serif; font-size:1.1rem; font-weight:800; margin-bottom:6px; color:var(--moss); }
-  .modal-sub { font-size:.75rem; color:#888; margin-bottom:18px; line-height:1.6; }
-  .field { margin-bottom:14px; }
-  .field label { display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em; color:#888; margin-bottom:5px; text-transform:uppercase; }
-  .field input, .field textarea, .field select { width:100%; padding:9px 12px; border:1.5px solid var(--mist); border-radius:8px; font-family:'Zen Kaku Gothic New',sans-serif; font-size:.85rem; transition:border-color .15s; background:var(--paper); color:var(--ink); }
-  .field input:focus, .field textarea:focus { outline:none; border-color:var(--moss); }
-  .field textarea { resize:vertical; min-height:70px; }
-  .field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:6px; }
-  .btn-save { background:var(--moss); color:white; padding:9px 20px; }
-  .btn-save:hover { background:#3a5232; }
-  .btn-cancel { background:var(--cream); color:var(--ink); padding:9px 20px; }
-  .gps-status { font-family:'DM Mono',monospace; font-size:.68rem; padding:6px 10px; border-radius:6px; margin-top:6px; }
-  .gps-ok   { background:#d4edda; color:#276139; }
-  .gps-fail { background:#fff3cd; color:#856404; }
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--mist);background:white;padding:0 24px;}
+.tab{padding:12px 18px;font-size:.8rem;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;color:#888;}
+.tab:hover{color:var(--moss);}
+.tab.active{color:var(--moss);border-bottom-color:var(--moss);}
 
-  /* JSON Import Modal specific */
-  .json-textarea {
-    width:100%; min-height:140px; padding:12px;
-    border:1.5px solid var(--mist); border-radius:8px;
-    font-family:'DM Mono',monospace; font-size:.78rem;
-    background:#fafaf8; color:var(--ink); resize:vertical;
-    transition:border-color .15s;
-  }
-  .json-textarea:focus { outline:none; border-color:var(--moss); }
-  .json-textarea.error { border-color:#c0392b; background:#fff5f5; }
-  .json-error-msg { color:#c0392b; font-size:.72rem; margin-top:6px; font-family:'DM Mono',monospace; display:none; }
-  .json-error-msg.show { display:block; }
+/* DETAIL VIEW */
+.detail-view{flex:1;overflow-y:auto;padding:28px;display:none;}
+.detail-view.show{display:block;}
 
-  /* Step guide */
-  .step-guide { background:var(--cream); border-radius:10px; padding:14px 16px; margin-bottom:18px; }
-  .step-guide-title { font-size:.72rem; font-weight:700; color:var(--moss); letter-spacing:.08em; margin-bottom:8px; text-transform:uppercase; }
-  .step { display:flex; gap:10px; align-items:flex-start; margin-bottom:8px; font-size:.78rem; line-height:1.5; color:#555; }
-  .step:last-child { margin-bottom:0; }
-  .step-num { background:var(--moss); color:white; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:.6rem; font-weight:700; flex-shrink:0; margin-top:1px; }
-  .step code { background:rgba(74,103,65,.1); padding:1px 5px; border-radius:3px; font-family:'DM Mono',monospace; font-size:.73rem; color:var(--moss); }
+.detail-hero{display:grid;grid-template-columns:220px 1fr;gap:24px;margin-bottom:28px;}
+.detail-photo-main{width:100%;aspect-ratio:1;border-radius:14px;object-fit:cover;border:3px solid var(--mist);box-shadow:0 4px 20px rgba(0,0,0,.1);}
+.detail-body{}
+.detail-name{font-family:'Shippori Mincho',serif;font-size:1.6rem;font-weight:800;line-height:1.2;margin-bottom:4px;}
+.detail-sci{font-family:'DM Mono',monospace;font-size:.8rem;color:#888;font-style:italic;margin-bottom:14px;}
+.detail-desc{font-size:.84rem;line-height:1.8;color:#444;margin-bottom:16px;}
+.tags-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.detail-tag{font-size:.68rem;padding:3px 10px;border-radius:20px;font-weight:700;}
+.detail-actions{display:flex;gap:8px;}
+.btn{padding:7px 14px;border:none;border-radius:8px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.76rem;cursor:pointer;transition:all .15s;font-weight:700;}
+.btn-moss{background:var(--moss);color:white;}
+.btn-moss:hover{background:#3a5232;}
+.btn-red{background:#fee;color:#c0392b;}
+.btn-red:hover{background:#fcc;}
+.btn-gray{background:var(--cream);color:var(--ink);}
 
-  /* EMPTY */
-  .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; padding:40px; text-align:center; color:#aaa; }
-  .empty-icon { font-size:3rem; margin-bottom:12px; opacity:.5; }
-  .empty-text { font-family:'Shippori Mincho',serif; font-size:1rem; color:#bbb; }
+/* TIMELINE / COMPARISON VIEW */
+.compare-view{flex:1;overflow-y:auto;padding:28px;display:none;}
+.compare-view.show{display:block;}
+.compare-empty{text-align:center;padding:60px 20px;color:#bbb;}
+.compare-empty-icon{font-size:3rem;margin-bottom:12px;opacity:.4;}
+.compare-empty-text{font-family:'Shippori Mincho',serif;font-size:1rem;}
 
-  /* TOAST */
-  .toast { position:fixed; bottom:24px; right:24px; background:var(--moss); color:white; padding:12px 20px; border-radius:10px; font-size:.82rem; font-weight:700; transform:translateY(80px); opacity:0; transition:all .3s; z-index:300; box-shadow:0 4px 20px rgba(0,0,0,.3); }
-  .toast.show { transform:none; opacity:1; }
-  .toast.error { background:#c0392b; }
+.season-section{margin-bottom:36px;}
+.season-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.season-label{font-family:'Shippori Mincho',serif;font-size:1rem;font-weight:800;color:var(--moss);}
+.season-line{flex:1;height:1px;background:var(--mist);}
+.season-count{font-family:'DM Mono',monospace;font-size:.65rem;color:#aaa;}
 
-  .leaflet-popup-content-wrapper { border-radius:10px; padding:0; overflow:hidden; box-shadow:0 6px 24px rgba(0,0,0,.2); }
-  .leaflet-popup-content { margin:0; }
-  .popup-inner { padding:10px 14px; font-family:'Zen Kaku Gothic New',sans-serif; min-width:160px; }
-  .popup-name { font-family:'Shippori Mincho',serif; font-weight:700; font-size:.9rem; }
-  .popup-sci  { font-family:'DM Mono',monospace; font-size:.62rem; color:#888; font-style:italic; }
-  .popup-date { font-family:'DM Mono',monospace; font-size:.6rem; color:#aaa; margin-top:2px; }
+.year-group{margin-bottom:20px;}
+.year-label{font-family:'DM Mono',monospace;font-size:.72rem;color:#aaa;letter-spacing:.1em;margin-bottom:10px;padding-left:2px;}
+.compare-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+.compare-card{border-radius:12px;overflow:hidden;border:2px solid var(--mist);cursor:pointer;transition:all .2s;background:white;}
+.compare-card:hover{border-color:var(--moss-light);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1);}
+.compare-card.selected{border-color:var(--moss);box-shadow:0 0 0 3px rgba(74,103,65,.2);}
+.compare-img{width:100%;aspect-ratio:1;object-fit:cover;}
+.compare-info{padding:8px 10px;}
+.compare-date{font-family:'DM Mono',monospace;font-size:.62rem;color:#888;}
+.compare-season-badge{display:inline-block;font-size:.55rem;padding:2px 6px;border-radius:4px;font-weight:700;margin-top:3px;}
+.compare-note{font-size:.7rem;color:#555;margin-top:3px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-  ::-webkit-scrollbar { width:6px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:var(--mist); border-radius:3px; }
+/* LIGHTBOX compare */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.lightbox.open{display:flex;}
+.lightbox-inner{background:white;border-radius:16px;padding:24px;max-width:900px;width:100%;max-height:90vh;overflow-y:auto;}
+.lightbox-title{font-family:'Shippori Mincho',serif;font-size:1.1rem;font-weight:800;color:var(--moss);margin-bottom:16px;}
+.lightbox-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+.lightbox-item{}
+.lightbox-img{width:100%;border-radius:10px;object-fit:cover;aspect-ratio:4/3;}
+.lightbox-label{font-family:'DM Mono',monospace;font-size:.7rem;color:#888;margin-top:6px;text-align:center;}
+.lightbox-close{position:absolute;top:20px;right:24px;background:rgba(255,255,255,.2);border:none;color:white;font-size:1.2rem;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
-  @media (max-width:768px) {
-    .app { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
-    .left-panel { max-height:55vh; }
-    .detail-drawer.open { height:260px; }
-    .detail-inner { grid-template-columns:110px 1fr; }
-    .btn-import span.label { display:none; }
-  }
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:40px;text-align:center;color:#aaa;}
+.empty-icon{font-size:3rem;margin-bottom:12px;opacity:.4;}
+.empty-text{font-family:'Shippori Mincho',serif;font-size:1rem;color:#bbb;line-height:1.8;}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:white;border-radius:16px;padding:26px;width:500px;max-width:95vw;transform:translateY(16px) scale(.97);transition:transform .25s;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto;}
+.modal-overlay.open .modal{transform:none;}
+.modal-title{font-family:'Shippori Mincho',serif;font-size:1.05rem;font-weight:800;margin-bottom:16px;color:var(--moss);}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.08em;color:#888;margin-bottom:4px;text-transform:uppercase;}
+.field input,.field textarea,.field select{width:100%;padding:8px 11px;border:1.5px solid var(--mist);border-radius:8px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.84rem;background:var(--paper);color:var(--ink);transition:border-color .15s;}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--moss);}
+.field textarea{resize:vertical;min-height:65px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+.btn-save{background:var(--moss);color:white;padding:8px 18px;}
+.btn-save:hover{background:#3a5232;}
+.btn-cancel{background:var(--cream);color:var(--ink);padding:8px 18px;}
+
+/* Tag picker in modal */
+.tag-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.tag-option{font-size:.68rem;padding:4px 11px;border-radius:20px;border:1.5px solid var(--mist);cursor:pointer;background:white;transition:all .15s;font-weight:600;}
+.tag-option:hover{border-color:var(--moss-light);}
+.tag-option.selected{background:var(--moss);color:white;border-color:var(--moss);}
+
+/* Tag manager */
+.tag-list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border:1.5px solid var(--mist);border-radius:8px;margin-bottom:6px;}
+.tag-list-name{font-size:.82rem;font-weight:600;}
+.tag-del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:.9rem;padding:2px 6px;border-radius:4px;transition:color .15s;}
+.tag-del-btn:hover{color:#c0392b;}
+.tag-add-row{display:flex;gap:8px;margin-top:10px;}
+.tag-add-input{flex:1;padding:7px 11px;border:1.5px solid var(--mist);border-radius:8px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.82rem;background:var(--paper);}
+.tag-add-input:focus{outline:none;border-color:var(--moss);}
+.tag-add-btn{background:var(--moss);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:700;cursor:pointer;}
+
+/* JSON area */
+.json-textarea{width:100%;min-height:130px;padding:10px;border:1.5px solid var(--mist);border-radius:8px;font-family:'DM Mono',monospace;font-size:.76rem;background:#fafaf8;resize:vertical;}
+.json-textarea:focus{outline:none;border-color:var(--moss);}
+.json-textarea.error{border-color:#c0392b;background:#fff5f5;}
+.json-err{color:#c0392b;font-size:.7rem;margin-top:5px;display:none;}
+.json-err.show{display:block;}
+.step-guide{background:var(--cream);border-radius:8px;padding:12px 14px;margin-bottom:14px;}
+.step-guide-title{font-size:.68rem;font-weight:700;color:var(--moss);letter-spacing:.08em;margin-bottom:7px;text-transform:uppercase;}
+.step{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:.76rem;line-height:1.5;color:#555;}
+.step:last-child{margin-bottom:0;}
+.step-num{background:var(--moss);color:white;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;flex-shrink:0;margin-top:2px;}
+.step code{background:rgba(74,103,65,.1);padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-size:.7rem;color:var(--moss);}
+
+/* Season colors */
+.s-spring{background:#ffe0f0;color:#b5447a;}
+.s-summer{background:#d4edda;color:#276139;}
+.s-autumn{background:#fff3cd;color:#856404;}
+.s-winter{background:#d6eaff;color:#2563a8;}
+.s-unknown{background:#e2e3e5;color:#495057;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--moss);color:white;padding:11px 18px;border-radius:10px;font-size:.8rem;font-weight:700;transform:translateY(80px);opacity:0;transition:all .3s;z-index:300;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.toast.show{transform:none;opacity:1;}
+.toast.err{background:#c0392b;}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--mist);border-radius:3px;}
+
+@media(max-width:768px){
+  .app{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+  .sidebar{max-height:50vh;}
+  .detail-hero{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -162,23 +210,26 @@
     <div class="logo">みどりの<span>図鑑</span></div>
     <div class="logo-sub">MY PERSONAL PLANT JOURNAL</div>
   </div>
-  <div class="header-right">
-    <div class="header-stats" id="headerStats">0 件の記録</div>
-    <button class="btn-import" onclick="openImportModal()">
-      📋 <span class="label">ClaudeからJSON読み込み</span>
-    </button>
+  <div class="header-actions">
+    <span id="headerStats" style="font-family:'DM Mono',monospace;font-size:.72rem;opacity:.8;">0件</span>
+    <button class="hbtn hbtn-outline" onclick="openTagManager()">🏷 タグ管理</button>
+    <button class="hbtn hbtn-gold" onclick="openImportModal()">📋 JSON読み込み</button>
   </div>
 </header>
 
 <div class="app">
-  <div class="left-panel">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
     <div class="upload-zone">
       <div class="drop-area" id="dropArea">
         <input type="file" id="fileInput" accept="image/*" multiple>
         <div class="drop-icon">🌿</div>
-        <div class="drop-text">写真をドロップ / タップして選択</div>
-        <div class="drop-sub">手動登録用 ｜ 複数枚OK</div>
+        <div class="drop-text">写真を追加（手動登録）</div>
+        <div class="drop-sub">ドロップ またはタップ</div>
       </div>
+    </div>
+    <div class="filter-bar" id="filterBar">
+      <span class="filter-tag active" data-tag="all" onclick="setFilter('all')">すべて</span>
     </div>
     <div class="entries-header">
       <span>記録一覧</span>
@@ -187,110 +238,189 @@
     <div class="entries-list" id="entriesList">
       <div class="empty-state">
         <div class="empty-icon">🍃</div>
-        <div class="empty-text">ClaudeでAI識別後に<br>「📋 JSON読み込み」で登録しよう</div>
+        <div class="empty-text">写真をアップロードして<br>図鑑を作り始めよう</div>
       </div>
     </div>
   </div>
 
-  <div class="right-panel">
-    <div id="map"></div>
-    <div class="detail-drawer" id="detailDrawer">
-      <div class="detail-inner" id="detailInner"></div>
+  <!-- MAIN -->
+  <div class="main">
+    <div class="tabs">
+      <div class="tab active" id="tab-detail" onclick="switchTab('detail')">📖 詳細</div>
+      <div class="tab" id="tab-compare" onclick="switchTab('compare')">🗓 季節比較</div>
+    </div>
+
+    <!-- DETAIL VIEW -->
+    <div class="detail-view show" id="detailView">
+      <div class="empty-state" id="detailEmpty">
+        <div class="empty-icon">🌸</div>
+        <div class="empty-text">左のリストから植物を選ぶか<br>写真をアップロードしてください</div>
+      </div>
+      <div id="detailContent" style="display:none;">
+        <div class="detail-hero">
+          <img class="detail-photo-main" id="detailPhoto" src="" alt="">
+          <div class="detail-body">
+            <div class="detail-name" id="detailName"></div>
+            <div class="detail-sci"  id="detailSci"></div>
+            <div class="tags-row"    id="detailTags"></div>
+            <div class="detail-desc" id="detailDesc"></div>
+            <div style="font-family:'DM Mono',monospace;font-size:.68rem;color:#aaa;margin-bottom:14px;" id="detailDate"></div>
+            <div class="detail-actions">
+              <button class="btn btn-moss" id="btnEdit">✏️ 編集</button>
+              <button class="btn btn-red"  id="btnDel">🗑 削除</button>
+            </div>
+          </div>
+        </div>
+        <!-- same-name photos -->
+        <div id="relatedSection" style="display:none;">
+          <div style="font-family:'Shippori Mincho',serif;font-size:1rem;font-weight:800;color:var(--moss);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--mist);">
+            📸 同じ植物の他の記録
+          </div>
+          <div class="compare-grid" id="relatedGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARE VIEW -->
+    <div class="compare-view" id="compareView">
+      <div class="compare-empty" id="compareEmpty">
+        <div class="compare-empty-icon">🗓</div>
+        <div class="compare-empty-text">植物を選ぶと<br>季節・年ごとの写真が並びます</div>
+      </div>
+      <div id="compareContent"></div>
     </div>
   </div>
 </div>
 
-<!-- JSON Import Modal -->
-<div class="modal-overlay" id="importModalOverlay">
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-inner" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="lightbox-title" id="lightboxTitle"></div>
+      <button class="btn btn-gray" onclick="closeLightbox()">✕ 閉じる</button>
+    </div>
+    <div class="lightbox-grid" id="lightboxGrid"></div>
+  </div>
+</div>
+
+<!-- JSON IMPORT MODAL -->
+<div class="modal-overlay" id="importOverlay">
   <div class="modal">
     <div class="modal-title">📋 ClaudeのAI識別結果を読み込む</div>
-
     <div class="step-guide">
       <div class="step-guide-title">使い方</div>
       <div class="step"><div class="step-num">1</div><div>Claude.aiで写真を送り <code>図鑑JSON出力して</code> と伝える</div></div>
-      <div class="step"><div class="step-num">2</div><div>Claudeが出力したJSONを全て選択してコピー</div></div>
-      <div class="step"><div class="step-num">3</div><div>下のテキストエリアに貼り付けて「登録する」</div></div>
+      <div class="step"><div class="step-num">2</div><div>Claudeが出力したJSONをコピー</div></div>
+      <div class="step"><div class="step-num">3</div><div>下に貼り付けて「登録する」</div></div>
     </div>
-
     <div class="field">
-      <label>JSONをここに貼り付け</label>
-      <textarea class="json-textarea" id="jsonInput" placeholder='{
-  "name": "ソメイヨシノ",
-  "sci": "Prunus × yedoensis",
-  "category": "plant",
-  "desc": "日本を代表する桜の品種...",
-  "lat": 35.6812,
-  "lng": 139.7671
-}'></textarea>
-      <div class="json-error-msg" id="jsonError">⚠️ JSONの形式が正しくありません。Claudeの出力をそのまま貼り付けてください。</div>
+      <label>JSONを貼り付け</label>
+      <textarea class="json-textarea" id="jsonInput" placeholder='{"name":"アジサイ","sci":"Hydrangea macrophylla","category":"plant","desc":"説明...","season":"summer","year":2025}'></textarea>
+      <div class="json-err" id="jsonErr">⚠️ JSONの形式が正しくありません</div>
     </div>
-
     <div class="field">
       <label>写真（任意）</label>
-      <div class="drop-area" id="importDropArea" style="padding:14px;">
+      <div class="drop-area" id="importDropArea" style="padding:12px;">
         <input type="file" id="importFileInput" accept="image/*">
-        <div style="font-size:.8rem;color:var(--moss);font-weight:700;">📸 写真を追加（任意）</div>
-        <div style="font-size:.7rem;color:#aaa;margin-top:3px;" id="importFileName">選択されていません</div>
+        <div style="font-size:.78rem;color:var(--moss);font-weight:700;">📸 写真を追加</div>
+        <div style="font-size:.68rem;color:#aaa;margin-top:2px;" id="importFileName">選択されていません</div>
       </div>
     </div>
-
+    <div class="field">
+      <label>タグを選択</label>
+      <div class="tag-picker" id="importTagPicker"></div>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-cancel" id="cancelImport">キャンセル</button>
-      <button class="btn btn-save" id="doImport">✅ 登録する</button>
+      <button class="btn btn-save"   id="doImport">✅ 登録する</button>
     </div>
   </div>
 </div>
 
-<!-- 手動追加モーダル -->
-<div class="modal-overlay" id="addModalOverlay">
+<!-- ADD MODAL (手動) -->
+<div class="modal-overlay" id="addOverlay">
   <div class="modal">
     <div class="modal-title">🌿 新しい記録を追加</div>
-    <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;">
-      <img id="addPreview" style="width:72px;height:72px;border-radius:10px;object-fit:cover;border:2px solid var(--mist);" src="" alt="">
-      <div id="addGpsStatus" class="gps-status gps-fail">📍 位置情報を取得中...</div>
+    <div style="margin-bottom:14px;">
+      <img id="addPreview" style="width:80px;height:80px;border-radius:10px;object-fit:cover;border:2px solid var(--mist);" src="" alt="">
     </div>
     <div class="field"><label>名前（日本語） *</label><input type="text" id="addName" placeholder="例：ソメイヨシノ"></div>
     <div class="field"><label>学名・英名</label><input type="text" id="addSci" placeholder="例：Prunus × yedoensis"></div>
     <div class="field"><label>説明・メモ</label><textarea id="addDesc" placeholder="気づいたことや特徴など..."></textarea></div>
-    <div class="field"><label>種別</label>
-      <select id="addCategory">
-        <option value="plant">🌿 植物</option>
-        <option value="animal">🦋 生き物</option>
-        <option value="other">🍄 その他</option>
-      </select>
-    </div>
     <div class="field-row">
-      <div class="field"><label>緯度</label><input type="number" id="addLat" step="0.000001" placeholder="35.6812"></div>
-      <div class="field"><label>経度</label><input type="number" id="addLng" step="0.000001" placeholder="139.7671"></div>
+      <div class="field">
+        <label>季節</label>
+        <select id="addSeason">
+          <option value="spring">🌸 春</option>
+          <option value="summer">🌿 夏</option>
+          <option value="autumn">🍂 秋</option>
+          <option value="winter">❄️ 冬</option>
+          <option value="unknown">— 不明</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>年</label>
+        <input type="number" id="addYear" placeholder="2025" min="2000" max="2100">
+      </div>
     </div>
+    <div class="field">
+      <label>タグ</label>
+      <div class="tag-picker" id="addTagPicker"></div>
+    </div>
+    <div class="field"><label>メモ（この写真について）</label><input type="text" id="addNote" placeholder="開花最盛期、など"></div>
     <div class="modal-actions">
       <button class="btn btn-cancel" id="cancelAdd">キャンセル</button>
-      <button class="btn btn-save" id="saveAdd">記録する ✅</button>
+      <button class="btn btn-save"   id="saveAdd">記録する</button>
     </div>
   </div>
 </div>
 
-<!-- 編集モーダル -->
-<div class="modal-overlay" id="editModalOverlay">
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editOverlay">
   <div class="modal">
     <div class="modal-title">✏️ 記録を編集</div>
     <div class="field"><label>名前（日本語）</label><input type="text" id="editName"></div>
     <div class="field"><label>学名・英名</label><input type="text" id="editSci"></div>
     <div class="field"><label>説明・メモ</label><textarea id="editDesc"></textarea></div>
     <div class="field-row">
-      <div class="field"><label>緯度</label><input type="number" id="editLat" step="0.000001"></div>
-      <div class="field"><label>経度</label><input type="number" id="editLng" step="0.000001"></div>
+      <div class="field">
+        <label>季節</label>
+        <select id="editSeason">
+          <option value="spring">🌸 春</option>
+          <option value="summer">🌿 夏</option>
+          <option value="autumn">🍂 秋</option>
+          <option value="winter">❄️ 冬</option>
+          <option value="unknown">— 不明</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>年</label>
+        <input type="number" id="editYear" min="2000" max="2100">
+      </div>
     </div>
-    <div class="field"><label>種別</label>
-      <select id="editCategory">
-        <option value="plant">🌿 植物</option>
-        <option value="animal">🦋 生き物</option>
-        <option value="other">🍄 その他</option>
-      </select>
+    <div class="field">
+      <label>タグ</label>
+      <div class="tag-picker" id="editTagPicker"></div>
     </div>
+    <div class="field"><label>メモ（この写真について）</label><input type="text" id="editNote"></div>
     <div class="modal-actions">
       <button class="btn btn-cancel" id="cancelEdit">キャンセル</button>
-      <button class="btn btn-save" id="saveEdit">保存する</button>
+      <button class="btn btn-save"   id="saveEdit">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAG MANAGER MODAL -->
+<div class="modal-overlay" id="tagMgrOverlay">
+  <div class="modal">
+    <div class="modal-title">🏷 タグを管理</div>
+    <div id="tagMgrList"></div>
+    <div class="tag-add-row">
+      <input class="tag-add-input" id="tagMgrInput" placeholder="新しいタグ名（例：希少種、街路樹）" maxlength="20">
+      <button class="tag-add-btn" onclick="addCustomTag()">追加</button>
+    </div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn btn-cancel" id="closeTagMgr">閉じる</button>
     </div>
   </div>
 </div>
@@ -298,304 +428,411 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── STATE ───────────────────────────────────────
+// ── STATE ──────────────────────────────────────────
 let entries = [];
+let tags = ['植物','生き物','その他','希少種','街路樹','公園'];
 let activeId = null;
 let editingId = null;
-let pendingImageData = null;
-let importImageData = null;
-let map, markers = {};
+let pendingImg = null;
+let importImg = null;
+let currentFilter = 'all';
+let currentTab = 'detail';
+let selectedImportTags = [];
+let selectedAddTags = [];
+let selectedEditTags = [];
 
-function loadEntries() {
+const SEASONS = {spring:{label:'春',emoji:'🌸',cls:'s-spring'},summer:{label:'夏',emoji:'🌿',cls:'s-summer'},autumn:{label:'秋',emoji:'🍂',cls:'s-autumn'},winter:{label:'冬',emoji:'❄️',cls:'s-winter'},unknown:{label:'不明',emoji:'—',cls:'s-unknown'}};
+const SEASON_ORDER = ['spring','summer','autumn','winter','unknown'];
+
+// ── STORAGE ────────────────────────────────────────
+function load() {
   try {
-    const meta = JSON.parse(localStorage.getItem('zukan_meta') || '[]');
-    entries = meta.map(m => ({ ...m, imageData: localStorage.getItem('zukan_img_' + m.id) || '' }));
-  } catch(e) { entries = []; }
+    const meta = JSON.parse(localStorage.getItem('zukan_meta')||'[]');
+    entries = meta.map(m=>({...m, imageData: localStorage.getItem('zukan_img_'+m.id)||''}));
+    tags = JSON.parse(localStorage.getItem('zukan_tags')||JSON.stringify(tags));
+  } catch(e){ entries=[]; }
 }
-
-function saveEntries() {
+function saveMeta() {
   try {
-    localStorage.setItem('zukan_meta', JSON.stringify(entries.map(({ imageData, ...r }) => r)));
-    entries.forEach(e => { if (e.imageData) { try { localStorage.setItem('zukan_img_' + e.id, e.imageData); } catch(ex) {} } });
-  } catch(e) {}
+    localStorage.setItem('zukan_meta', JSON.stringify(entries.map(({imageData,...r})=>r)));
+    localStorage.setItem('zukan_tags', JSON.stringify(tags));
+  } catch(e){}
+}
+function saveImg(id, data) {
+  try { localStorage.setItem('zukan_img_'+id, data); } catch(e){}
+}
+function delImg(id) { localStorage.removeItem('zukan_img_'+id); }
+
+// ── TAG COLOR ──────────────────────────────────────
+const TAG_COLORS = ['#d4edda|#276139','#fff3cd|#856404','#d6eaff|#2563a8','#ffe0f0|#b5447a','#e8e0ff|#5b3fa8','#fde8d8|#a84a2a','#d4f0f0|#1a6b6b'];
+function tagColor(tag) {
+  const idx = tags.indexOf(tag) % TAG_COLORS.length;
+  const [bg,fg] = (TAG_COLORS[Math.max(idx,0)]||TAG_COLORS[0]).split('|');
+  return `background:${bg};color:${fg};`;
 }
 
-// ─── MAP ─────────────────────────────────────────
-function initMap() {
-  map = L.map('map').setView([35.6812, 139.7671], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19
-  }).addTo(map);
+// ── FILTER BAR ────────────────────────────────────
+function renderFilterBar() {
+  const bar = document.getElementById('filterBar');
+  const allTags = [...new Set(entries.flatMap(e=>e.tags||[]))];
+  bar.innerHTML = `<span class="filter-tag ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">すべて</span>`
+    + allTags.map(t=>`<span class="filter-tag ${currentFilter===t?'active':''}" onclick="setFilter('${t}')" style="${tagColor(t)}">${t}</span>`).join('');
+}
+function setFilter(tag) {
+  currentFilter = tag;
+  renderFilterBar();
+  renderList();
 }
 
-function addMarker(entry) {
-  if (!entry.lat || !entry.lng) return;
-  if (markers[entry.id]) markers[entry.id].remove();
-  const color = entry.category==='animal'?'#c8a84b':entry.category==='other'?'#8b6f47':'#4a6741';
-  const emoji = entry.category==='animal'?'🦋':entry.category==='other'?'🍄':'🌿';
-  const icon = L.divIcon({
-    className:'',
-    html:`<div style="width:36px;height:36px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:${color};border:3px solid white;box-shadow:0 3px 12px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:14px;">${emoji}</span></div>`,
-    iconSize:[36,36], iconAnchor:[18,36]
-  });
-  const marker = L.marker([entry.lat, entry.lng], { icon }).addTo(map);
-  marker.bindPopup(`<div class="popup-inner"><div class="popup-name">${entry.name}</div><div class="popup-sci">${entry.sci||''}</div><div class="popup-date">📍 ${entry.date}</div></div>`);
-  marker.on('click', () => selectEntry(entry.id));
-  markers[entry.id] = marker;
-}
-
-// ─── RENDER ──────────────────────────────────────
+// ── RENDER LIST ───────────────────────────────────
 function renderList() {
-  document.getElementById('entryCount').textContent = entries.length;
-  document.getElementById('headerStats').textContent = entries.length + ' 件の記録';
   const list = document.getElementById('entriesList');
-  if (!entries.length) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🍃</div><div class="empty-text">ClaudeでAI識別後に<br>「📋 JSON読み込み」で登録しよう</div></div>';
+  const filtered = currentFilter==='all' ? entries : entries.filter(e=>(e.tags||[]).includes(currentFilter));
+  document.getElementById('entryCount').textContent = filtered.length;
+  document.getElementById('headerStats').textContent = entries.length + '件の記録';
+  if (!filtered.length) {
+    list.innerHTML='<div class="empty-state"><div class="empty-icon">🍃</div><div class="empty-text">まだ記録がありません</div></div>';
     return;
   }
-  list.innerHTML = entries.map(e => {
-    const bc = e.category==='animal'?'badge-animal':e.category==='other'?'badge-other':'badge-plant';
-    const bl = e.category==='animal'?'生き物':e.category==='other'?'その他':'植物';
+  list.innerHTML = filtered.map(e => {
+    const s = SEASONS[e.season||'unknown'];
+    const tagHtml = (e.tags||[]).slice(0,2).map(t=>`<span class="entry-tag" style="${tagColor(t)}">${t}</span>`).join('');
     return `<div class="entry-card ${activeId===e.id?'active':''}" onclick="selectEntry('${e.id}')">
-      <img class="entry-thumb" src="${e.imageData||'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1 1%22><rect fill=%22%23d4ddd0%22 width=%221%22 height=%221%22/></svg>'}" alt="">
+      <img class="entry-thumb" src="${e.imageData||blankImg()}" alt="">
       <div class="entry-info">
         <div class="entry-name">${e.name}</div>
         <div class="entry-sci">${e.sci||'—'}</div>
-        <div class="entry-date">${e.date}</div>
+        <div class="entry-meta">
+          <span>${s.emoji} ${s.label}</span>
+          ${e.year?`<span>${e.year}年</span>`:''}
+          ${tagHtml}
+        </div>
       </div>
-      <span class="entry-badge ${bc}">${bl}</span>
     </div>`;
   }).join('');
 }
+function blankImg(){return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect fill='%23d4ddd0' width='1' height='1'/%3E%3C/svg%3E";}
 
+// ── SELECT ENTRY ──────────────────────────────────
 function selectEntry(id) {
   activeId = id;
-  const e = entries.find(x => x.id===id);
+  const e = entries.find(x=>x.id===id);
   if (!e) return;
   renderList();
   showDetail(e);
-  if (e.lat && e.lng && markers[id]) { map.flyTo([e.lat,e.lng],15,{duration:1.2}); markers[id].openPopup(); }
+  if (currentTab==='compare') renderCompare(e);
 }
 
+// ── DETAIL VIEW ───────────────────────────────────
 function showDetail(e) {
-  const locStr = (e.lat&&e.lng) ? `${e.lat.toFixed(5)}, ${e.lng.toFixed(5)}` : '位置情報なし';
-  document.getElementById('detailInner').innerHTML = `
-    <img class="detail-photo" src="${e.imageData||''}" alt="">
-    <div>
-      <div class="detail-name">${e.name}</div>
-      <div class="detail-sci">${e.sci||''}</div>
-      <div class="detail-desc">${e.desc||'メモなし'}</div>
-      <div class="detail-meta">
-        <span class="meta-chip">📅 ${e.date}</span>
-        <span class="meta-chip">📍 ${locStr}</span>
-        <span class="meta-chip">${e.category==='animal'?'🦋 生き物':e.category==='other'?'🍄 その他':'🌿 植物'}</span>
-      </div>
-      <div class="detail-actions">
-        <button class="btn btn-edit" onclick="openEdit('${e.id}')">✏️ 編集</button>
-        <button class="btn btn-del"  onclick="deleteEntry('${e.id}')">🗑 削除</button>
-        <button class="btn btn-close" onclick="closeDetail()">✕</button>
-      </div>
-    </div>`;
-  document.getElementById('detailDrawer').classList.add('open');
+  document.getElementById('detailEmpty').style.display='none';
+  document.getElementById('detailContent').style.display='block';
+  document.getElementById('detailPhoto').src = e.imageData||blankImg();
+  document.getElementById('detailName').textContent = e.name;
+  document.getElementById('detailSci').textContent  = e.sci||'';
+  document.getElementById('detailDesc').textContent = e.desc||'メモなし';
+  const s = SEASONS[e.season||'unknown'];
+  document.getElementById('detailDate').textContent = `${s.emoji} ${s.label}${e.year?' · '+e.year+'年':''}${e.note?' · '+e.note:''}`;
+  document.getElementById('detailTags').innerHTML = (e.tags||[]).map(t=>`<span class="detail-tag" style="${tagColor(t)}">${t}</span>`).join('');
+  document.getElementById('btnEdit').onclick = ()=>openEdit(e.id);
+  document.getElementById('btnDel').onclick  = ()=>deleteEntry(e.id);
+
+  // Related (same name)
+  const related = entries.filter(x=>x.name===e.name && x.id!==e.id);
+  const relSec = document.getElementById('relatedSection');
+  if (related.length) {
+    relSec.style.display='block';
+    document.getElementById('relatedGrid').innerHTML = related.map(r=>{
+      const rs=SEASONS[r.season||'unknown'];
+      return `<div class="compare-card" onclick="selectEntry('${r.id}')">
+        <img class="compare-img" src="${r.imageData||blankImg()}" alt="">
+        <div class="compare-info">
+          <div class="compare-date">${r.year||'—'}年</div>
+          <span class="compare-season-badge ${rs.cls}">${rs.emoji} ${rs.label}</span>
+          ${r.note?`<div class="compare-note">${r.note}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+  } else { relSec.style.display='none'; }
 }
 
-function closeDetail() {
-  document.getElementById('detailDrawer').classList.remove('open');
-  activeId = null; renderList();
-}
+// ── COMPARE VIEW ──────────────────────────────────
+function renderCompare(e) {
+  const same = entries.filter(x=>x.name===e.name);
+  const content = document.getElementById('compareContent');
+  const empty   = document.getElementById('compareEmpty');
 
-// ─── GPS ─────────────────────────────────────────
-function getLocation() {
-  return new Promise(resolve => {
-    if (!navigator.geolocation) { resolve(null); return; }
-    navigator.geolocation.getCurrentPosition(
-      p => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => resolve(null), { timeout:8000, maximumAge:30000 }
-    );
+  if (same.length===0) { empty.style.display='block'; content.innerHTML=''; return; }
+  empty.style.display='none';
+
+  // group by season then year
+  const bySeason = {};
+  SEASON_ORDER.forEach(s=>{ bySeason[s]=[]; });
+  same.forEach(x=>{ const s=x.season||'unknown'; (bySeason[s]=bySeason[s]||[]).push(x); });
+
+  let html = `<div style="font-family:'Shippori Mincho',serif;font-size:1.2rem;font-weight:800;margin-bottom:20px;color:var(--moss);">「${e.name}」の季節記録</div>`;
+
+  SEASON_ORDER.forEach(sKey=>{
+    const items = bySeason[sKey];
+    if (!items||!items.length) return;
+    const s = SEASONS[sKey];
+
+    // group by year
+    const byYear = {};
+    items.forEach(x=>{ const y=x.year||'年不明'; (byYear[y]=byYear[y]||[]).push(x); });
+    const years = Object.keys(byYear).sort();
+
+    html += `<div class="season-section">
+      <div class="season-header">
+        <span class="season-label">${s.emoji} ${s.label}</span>
+        <div class="season-line"></div>
+        <span class="season-count">${items.length}枚</span>
+      </div>`;
+
+    years.forEach(yr=>{
+      const yItems = byYear[yr];
+      html += `<div class="year-group">
+        <div class="year-label">${yr}${yr!=='年不明'?'年':''}</div>
+        <div class="compare-grid">
+          ${yItems.map(r=>`<div class="compare-card" onclick="selectEntry('${r.id}');switchTab('detail')">
+            <img class="compare-img" src="${r.imageData||blankImg()}" alt="">
+            <div class="compare-info">
+              <div class="compare-date">${r.date||''}</div>
+              ${r.note?`<div class="compare-note">${r.note}</div>`:'<div class="compare-note" style="color:#ccc;">メモなし</div>'}
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    });
+
+    // 全季節一括比較ボタン（2枚以上）
+    if (items.length>1) {
+      html += `<button class="btn btn-gray" style="margin-top:6px;font-size:.72rem;" onclick="openLightbox('${e.name}','${sKey}')">🔍 ${s.label}の写真を並べて比較</button>`;
+    }
+    html += `</div>`;
   });
+
+  content.innerHTML = html;
 }
 
-// ─── JSON IMPORT ─────────────────────────────────
+// ── LIGHTBOX ──────────────────────────────────────
+function openLightbox(name, season) {
+  const items = entries.filter(x=>x.name===name&&(x.season||'unknown')===season);
+  const s = SEASONS[season];
+  document.getElementById('lightboxTitle').textContent = `「${name}」${s.emoji}${s.label}の比較`;
+  document.getElementById('lightboxGrid').innerHTML = items.map(r=>`
+    <div class="lightbox-item">
+      <img class="lightbox-img" src="${r.imageData||blankImg()}" alt="">
+      <div class="lightbox-label">${r.year||'年不明'}年${r.note?' · '+r.note:''}</div>
+    </div>`).join('');
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); }
+
+// ── TABS ──────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-detail').classList.toggle('active', tab==='detail');
+  document.getElementById('tab-compare').classList.toggle('active', tab==='compare');
+  document.getElementById('detailView').classList.toggle('show', tab==='detail');
+  document.getElementById('compareView').classList.toggle('show', tab==='compare');
+  if (tab==='compare' && activeId) {
+    const e = entries.find(x=>x.id===activeId);
+    if (e) renderCompare(e);
+  }
+}
+
+// ── TAG PICKER ────────────────────────────────────
+function renderTagPicker(containerId, selected) {
+  document.getElementById(containerId).innerHTML = tags.map(t=>
+    `<span class="tag-option ${selected.includes(t)?'selected':''}" style="${selected.includes(t)?'':''}${tagColor(t)}" onclick="toggleTag('${containerId}','${t}')">${t}</span>`
+  ).join('');
+}
+function toggleTag(containerId, tag) {
+  const arr = containerId==='importTagPicker'?selectedImportTags:containerId==='addTagPicker'?selectedAddTags:selectedEditTags;
+  const idx=arr.indexOf(tag);
+  if(idx>=0)arr.splice(idx,1); else arr.push(tag);
+  renderTagPicker(containerId, arr);
+}
+
+// ── TAG MANAGER ───────────────────────────────────
+function openTagManager() {
+  renderTagMgrList();
+  document.getElementById('tagMgrOverlay').classList.add('open');
+}
+function renderTagMgrList() {
+  document.getElementById('tagMgrList').innerHTML = tags.map((t,i)=>`
+    <div class="tag-list-item">
+      <span class="tag-list-name" style="${tagColor(t)};padding:3px 10px;border-radius:12px;">${t}</span>
+      <button class="tag-del-btn" onclick="removeTag(${i})">✕</button>
+    </div>`).join('');
+}
+function removeTag(idx) {
+  if(!confirm(`タグ「${tags[idx]}」を削除しますか？`)) return;
+  tags.splice(idx,1); saveMeta(); renderTagMgrList(); renderFilterBar();
+}
+function addCustomTag() {
+  const val = document.getElementById('tagMgrInput').value.trim();
+  if(!val||tags.includes(val)) return;
+  tags.push(val); saveMeta(); renderTagMgrList(); renderFilterBar();
+  document.getElementById('tagMgrInput').value='';
+  showToast(`🏷 「${val}」を追加しました`);
+}
+document.getElementById('closeTagMgr').onclick = ()=>document.getElementById('tagMgrOverlay').classList.remove('open');
+document.getElementById('tagMgrInput').addEventListener('keydown', e=>{ if(e.key==='Enter') addCustomTag(); });
+
+// ── JSON IMPORT ───────────────────────────────────
 function openImportModal() {
-  document.getElementById('jsonInput').value = '';
+  document.getElementById('jsonInput').value='';
   document.getElementById('jsonInput').classList.remove('error');
-  document.getElementById('jsonError').classList.remove('show');
-  document.getElementById('importFileName').textContent = '選択されていません';
-  importImageData = null;
-  document.getElementById('importModalOverlay').classList.add('open');
+  document.getElementById('jsonErr').classList.remove('show');
+  document.getElementById('importFileName').textContent='選択されていません';
+  importImg=null; selectedImportTags=[];
+  renderTagPicker('importTagPicker', selectedImportTags);
+  document.getElementById('importOverlay').classList.add('open');
 }
-
-document.getElementById('importFileInput').addEventListener('change', function() {
-  const file = this.files[0];
-  if (!file) return;
-  document.getElementById('importFileName').textContent = file.name;
-  const r = new FileReader();
-  r.onload = () => { importImageData = r.result; };
-  r.readAsDataURL(file);
-});
-
-document.getElementById('doImport').onclick = async () => {
-  const raw = document.getElementById('jsonInput').value.trim();
-  const ta  = document.getElementById('jsonInput');
-  const err = document.getElementById('jsonError');
-
+document.getElementById('importFileInput').onchange = function(){
+  const f=this.files[0]; if(!f)return;
+  document.getElementById('importFileName').textContent=f.name;
+  const r=new FileReader(); r.onload=()=>{importImg=r.result;}; r.readAsDataURL(f);
+};
+document.getElementById('doImport').onclick = ()=>{
+  const raw=document.getElementById('jsonInput').value.trim();
   let parsed;
-  try {
-    // コードブロック除去
-    const clean = raw.replace(/```json|```/gi, '').trim();
-    parsed = JSON.parse(clean);
-  } catch(e) {
-    ta.classList.add('error'); err.classList.add('show'); return;
+  try { parsed=JSON.parse(raw.replace(/```json|```/gi,'').trim()); } catch(e){
+    document.getElementById('jsonInput').classList.add('error');
+    document.getElementById('jsonErr').classList.add('show'); return;
   }
-  ta.classList.remove('error'); err.classList.remove('show');
-
-  // 複数件対応（配列でも単体でも）
-  const items = Array.isArray(parsed) ? parsed : [parsed];
-
-  for (const item of items) {
-    if (!item.name) continue;
-    const entry = {
-      id:       Date.now().toString() + Math.random().toString(36).slice(2,6),
-      name:     item.name || '不明',
-      sci:      item.sci || item.scientific_name || '',
-      category: item.category || 'plant',
-      desc:     item.desc || item.description || '',
-      date:     item.date || new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}),
-      lat:      parseFloat(item.lat) || null,
-      lng:      parseFloat(item.lng) || null,
-      imageData: importImageData || ''
+  document.getElementById('jsonInput').classList.remove('error');
+  document.getElementById('jsonErr').classList.remove('show');
+  const items=Array.isArray(parsed)?parsed:[parsed];
+  for(const item of items){
+    if(!item.name) continue;
+    const id=Date.now().toString()+Math.random().toString(36).slice(2,5);
+    const entry={
+      id, name:item.name, sci:item.sci||'', desc:item.desc||item.description||'',
+      season:item.season||guessSeason(), year:item.year||new Date().getFullYear(),
+      note:item.note||'', tags:selectedImportTags.slice(),
+      date:new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}),
+      imageData:importImg||''
     };
-    entries.unshift(entry);
-    saveEntries();
-    addMarker(entry);
+    entries.unshift(entry); saveMeta(); if(importImg) saveImg(id,importImg);
   }
-
-  renderList();
-  if (items.length === 1) {
-    const last = entries[0];
-    if (last.lat && last.lng) map.flyTo([last.lat,last.lng],15,{duration:1.5});
-    selectEntry(last.id);
-  } else if (entries.filter(e=>e.lat).length > 0) {
-    map.fitBounds(entries.filter(e=>e.lat).map(e=>[e.lat,e.lng]),{padding:[40,40]});
-  }
-
-  document.getElementById('importModalOverlay').classList.remove('open');
+  renderList(); renderFilterBar();
+  selectEntry(entries[0].id);
+  document.getElementById('importOverlay').classList.remove('open');
   showToast(`✅ ${items.length}件を登録しました`);
 };
+document.getElementById('cancelImport').onclick=()=>document.getElementById('importOverlay').classList.remove('open');
+document.getElementById('importOverlay').onclick=ev=>{if(ev.target===ev.currentTarget)document.getElementById('importOverlay').classList.remove('open');};
 
-document.getElementById('cancelImport').onclick = () => document.getElementById('importModalOverlay').classList.remove('open');
-document.getElementById('importModalOverlay').onclick = ev => { if(ev.target===ev.currentTarget) document.getElementById('importModalOverlay').classList.remove('open'); };
-
-// ─── 手動アップロード ─────────────────────────────
-async function handleFiles(files) { for (const f of files) await openAddModal(f); }
-
-async function openAddModal(file) {
-  const imageData = await new Promise((res,rej) => { const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
-  document.getElementById('addPreview').src = imageData;
-  document.getElementById('addName').value = '';
-  document.getElementById('addSci').value = '';
-  document.getElementById('addDesc').value = '';
-  document.getElementById('addCategory').value = 'plant';
-  document.getElementById('addLat').value = '';
-  document.getElementById('addLng').value = '';
-  document.getElementById('addGpsStatus').textContent = '📍 位置情報を取得中...';
-  document.getElementById('addGpsStatus').className = 'gps-status gps-fail';
-  pendingImageData = imageData;
-  document.getElementById('addModalOverlay').classList.add('open');
+// ── MANUAL ADD ────────────────────────────────────
+async function handleFiles(files){ for(const f of files) await openAddModal(f); }
+async function openAddModal(file){
+  const imageData=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+  document.getElementById('addPreview').src=imageData;
+  document.getElementById('addName').value='';
+  document.getElementById('addSci').value='';
+  document.getElementById('addDesc').value='';
+  document.getElementById('addNote').value='';
+  document.getElementById('addYear').value=new Date().getFullYear();
+  document.getElementById('addSeason').value=guessSeason();
+  pendingImg=imageData; selectedAddTags=[];
+  renderTagPicker('addTagPicker',selectedAddTags);
+  document.getElementById('addOverlay').classList.add('open');
   document.getElementById('addName').focus();
-  getLocation().then(loc => {
-    if (loc) {
-      document.getElementById('addLat').value = loc.lat.toFixed(6);
-      document.getElementById('addLng').value = loc.lng.toFixed(6);
-      document.getElementById('addGpsStatus').textContent = `✅ 位置取得済み：${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`;
-      document.getElementById('addGpsStatus').className = 'gps-status gps-ok';
-    } else {
-      document.getElementById('addGpsStatus').textContent = '⚠️ 位置情報を取得できませんでした';
-      document.getElementById('addGpsStatus').className = 'gps-status gps-fail';
-    }
-  });
 }
-
-document.getElementById('saveAdd').onclick = () => {
-  const name = document.getElementById('addName').value.trim();
-  if (!name) { showToast('⚠️ 名前を入力してください', true); return; }
-  const entry = {
-    id: Date.now().toString(),
-    name, sci: document.getElementById('addSci').value.trim(),
-    desc: document.getElementById('addDesc').value.trim(),
-    category: document.getElementById('addCategory').value,
-    date: new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}),
-    lat: parseFloat(document.getElementById('addLat').value)||null,
-    lng: parseFloat(document.getElementById('addLng').value)||null,
-    imageData: pendingImageData
+document.getElementById('saveAdd').onclick=()=>{
+  const name=document.getElementById('addName').value.trim();
+  if(!name){showToast('⚠️ 名前を入力してください',true);return;}
+  const id=Date.now().toString();
+  const entry={
+    id, name, sci:document.getElementById('addSci').value.trim(),
+    desc:document.getElementById('addDesc').value.trim(),
+    season:document.getElementById('addSeason').value,
+    year:parseInt(document.getElementById('addYear').value)||new Date().getFullYear(),
+    note:document.getElementById('addNote').value.trim(),
+    tags:selectedAddTags.slice(),
+    date:new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}),
+    imageData:pendingImg||''
   };
-  entries.unshift(entry); saveEntries(); renderList(); addMarker(entry);
-  if (entry.lat&&entry.lng) map.flyTo([entry.lat,entry.lng],15,{duration:1.5});
-  selectEntry(entry.id);
-  document.getElementById('addModalOverlay').classList.remove('open');
-  showToast(`✅ ${entry.name} を記録しました`);
+  entries.unshift(entry); saveMeta(); if(pendingImg) saveImg(id,pendingImg);
+  renderList(); renderFilterBar(); selectEntry(id);
+  document.getElementById('addOverlay').classList.remove('open');
+  showToast(`✅ ${name} を記録しました`);
 };
-document.getElementById('cancelAdd').onclick = () => document.getElementById('addModalOverlay').classList.remove('open');
-document.getElementById('addModalOverlay').onclick = ev => { if(ev.target===ev.currentTarget) document.getElementById('addModalOverlay').classList.remove('open'); };
+document.getElementById('cancelAdd').onclick=()=>document.getElementById('addOverlay').classList.remove('open');
+document.getElementById('addOverlay').onclick=ev=>{if(ev.target===ev.currentTarget)document.getElementById('addOverlay').classList.remove('open');};
 
-// ─── EDIT ────────────────────────────────────────
-function openEdit(id) {
-  editingId = id;
-  const e = entries.find(x=>x.id===id); if(!e) return;
-  document.getElementById('editName').value = e.name;
-  document.getElementById('editSci').value  = e.sci||'';
-  document.getElementById('editDesc').value = e.desc||'';
-  document.getElementById('editLat').value  = e.lat??'';
-  document.getElementById('editLng').value  = e.lng??'';
-  document.getElementById('editCategory').value = e.category||'plant';
-  document.getElementById('editModalOverlay').classList.add('open');
+// ── EDIT ──────────────────────────────────────────
+function openEdit(id){
+  editingId=id;
+  const e=entries.find(x=>x.id===id); if(!e)return;
+  document.getElementById('editName').value=e.name;
+  document.getElementById('editSci').value=e.sci||'';
+  document.getElementById('editDesc').value=e.desc||'';
+  document.getElementById('editSeason').value=e.season||'unknown';
+  document.getElementById('editYear').value=e.year||'';
+  document.getElementById('editNote').value=e.note||'';
+  selectedEditTags=(e.tags||[]).slice();
+  renderTagPicker('editTagPicker',selectedEditTags);
+  document.getElementById('editOverlay').classList.add('open');
 }
-document.getElementById('saveEdit').onclick = () => {
-  const idx = entries.findIndex(x=>x.id===editingId); if(idx<0) return;
-  const e = entries[idx];
-  e.name = document.getElementById('editName').value.trim()||e.name;
-  e.sci  = document.getElementById('editSci').value.trim();
-  e.desc = document.getElementById('editDesc').value.trim();
-  e.lat  = parseFloat(document.getElementById('editLat').value)||null;
-  e.lng  = parseFloat(document.getElementById('editLng').value)||null;
-  e.category = document.getElementById('editCategory').value;
-  saveEntries(); renderList(); addMarker(e); showDetail(e);
-  document.getElementById('editModalOverlay').classList.remove('open');
+document.getElementById('saveEdit').onclick=()=>{
+  const idx=entries.findIndex(x=>x.id===editingId); if(idx<0)return;
+  const e=entries[idx];
+  e.name=document.getElementById('editName').value.trim()||e.name;
+  e.sci=document.getElementById('editSci').value.trim();
+  e.desc=document.getElementById('editDesc').value.trim();
+  e.season=document.getElementById('editSeason').value;
+  e.year=parseInt(document.getElementById('editYear').value)||e.year;
+  e.note=document.getElementById('editNote').value.trim();
+  e.tags=selectedEditTags.slice();
+  saveMeta(); renderList(); renderFilterBar(); showDetail(e);
+  if(currentTab==='compare') renderCompare(e);
+  document.getElementById('editOverlay').classList.remove('open');
   showToast('💾 保存しました');
 };
-document.getElementById('cancelEdit').onclick = () => document.getElementById('editModalOverlay').classList.remove('open');
-document.getElementById('editModalOverlay').onclick = ev => { if(ev.target===ev.currentTarget) document.getElementById('editModalOverlay').classList.remove('open'); };
+document.getElementById('cancelEdit').onclick=()=>document.getElementById('editOverlay').classList.remove('open');
+document.getElementById('editOverlay').onclick=ev=>{if(ev.target===ev.currentTarget)document.getElementById('editOverlay').classList.remove('open');};
 
-// ─── DELETE ──────────────────────────────────────
-function deleteEntry(id) {
-  if (!confirm('この記録を削除しますか？')) return;
-  if (markers[id]) { markers[id].remove(); delete markers[id]; }
-  entries = entries.filter(e=>e.id!==id);
-  localStorage.removeItem('zukan_img_'+id);
-  saveEntries(); closeDetail(); showToast('🗑 削除しました');
+// ── DELETE ────────────────────────────────────────
+function deleteEntry(id){
+  if(!confirm('この記録を削除しますか？'))return;
+  entries=entries.filter(e=>e.id!==id); delImg(id); saveMeta();
+  activeId=null;
+  document.getElementById('detailEmpty').style.display='flex';
+  document.getElementById('detailContent').style.display='none';
+  renderList(); renderFilterBar();
+  showToast('🗑 削除しました');
 }
 
-// ─── DROP ZONE ───────────────────────────────────
-const dropArea = document.getElementById('dropArea');
-const fileInput = document.getElementById('fileInput');
-dropArea.addEventListener('dragover', e=>{e.preventDefault();dropArea.classList.add('drag-over');});
-dropArea.addEventListener('dragleave', ()=>dropArea.classList.remove('drag-over'));
-dropArea.addEventListener('drop', e=>{e.preventDefault();dropArea.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFiles(Array.from(e.dataTransfer.files));});
-fileInput.addEventListener('change', ()=>{if(fileInput.files.length)handleFiles(Array.from(fileInput.files));fileInput.value='';});
-
-// ─── TOAST ───────────────────────────────────────
-function showToast(msg, isError=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError?' error':'');
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2800);
+// ── SEASON GUESS ──────────────────────────────────
+function guessSeason(){
+  const m=new Date().getMonth()+1;
+  if(m>=3&&m<=5) return 'spring';
+  if(m>=6&&m<=8) return 'summer';
+  if(m>=9&&m<=11) return 'autumn';
+  return 'winter';
 }
 
-// ─── INIT ────────────────────────────────────────
-loadEntries(); initMap(); renderList();
-entries.forEach(addMarker);
-if (entries.filter(e=>e.lat).length>0) map.fitBounds(entries.filter(e=>e.lat).map(e=>[e.lat,e.lng]),{padding:[40,40]});
+// ── DROP ──────────────────────────────────────────
+const dropArea=document.getElementById('dropArea');
+const fileInput=document.getElementById('fileInput');
+dropArea.addEventListener('dragover',e=>{e.preventDefault();dropArea.classList.add('drag-over');});
+dropArea.addEventListener('dragleave',()=>dropArea.classList.remove('drag-over'));
+dropArea.addEventListener('drop',e=>{e.preventDefault();dropArea.classList.remove('drag-over');if(e.dataTransfer.files.length)handleFiles(Array.from(e.dataTransfer.files));});
+fileInput.addEventListener('change',()=>{if(fileInput.files.length)handleFiles(Array.from(fileInput.files));fileInput.value='';});
+
+// ── TOAST ─────────────────────────────────────────
+function showToast(msg,isErr=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(isErr?' err':'');
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── INIT ──────────────────────────────────────────
+load(); renderList(); renderFilterBar();
 </script>
 </body>
 </html>
