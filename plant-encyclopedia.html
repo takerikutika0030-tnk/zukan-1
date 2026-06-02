@@ -15,22 +15,22 @@ body{font-family:'Zen Kaku Gothic New',sans-serif;background:var(--paper);color:
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4;}
 
 /* HEADER */
-header{background:var(--moss);color:var(--paper);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,.25);}
-.logo{font-family:'Shippori Mincho',serif;font-size:1.35rem;font-weight:800;letter-spacing:.06em;}
+header{background:var(--moss);color:var(--paper);padding:0 16px;height:32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 10px rgba(0,0,0,.22);}
+.logo{font-family:'Shippori Mincho',serif;font-size:.88rem;font-weight:800;letter-spacing:.05em;display:flex;align-items:baseline;gap:5px;}
 .logo span{color:var(--gold);}
-.logo-sub{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.2em;opacity:.7;margin-top:1px;}
-.header-actions{display:flex;gap:8px;align-items:center;}
-.hbtn{border:none;border-radius:8px;padding:7px 13px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.74rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.logo-sub{font-family:'DM Mono',monospace;font-size:.46rem;letter-spacing:.16em;opacity:.55;}
+.header-actions{display:flex;gap:5px;align-items:center;}
+.hbtn{border:none;border-radius:6px;padding:3px 9px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.64rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1.6;}
 .hbtn-gold{background:var(--gold);color:var(--ink);}
-.hbtn-gold:hover{background:#b8943b;transform:translateY(-1px);}
-.hbtn-outline{background:transparent;color:var(--paper);border:1.5px solid rgba(255,255,255,.35);}
+.hbtn-gold:hover{background:#b8943b;}
+.hbtn-outline{background:transparent;color:var(--paper);border:1px solid rgba(255,255,255,.35);}
 .hbtn-outline:hover{background:rgba(255,255,255,.1);}
 .hbtn-green{background:var(--moss-light);color:white;}
 .hbtn-green:hover{background:#6a8e5e;}
-.hstat{font-family:'DM Mono',monospace;font-size:.7rem;opacity:.7;}
+.hstat{font-family:'DM Mono',monospace;font-size:.6rem;opacity:.65;}
 
 /* LAYOUT */
-.app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:calc(100vh - 56px);}
+.app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:calc(100vh - 32px);}
 
 /* SIDEBAR */
 .sidebar{background:var(--cream);border-right:1px solid var(--mist);display:flex;flex-direction:column;overflow:hidden;}
@@ -226,10 +226,7 @@ header{background:var(--moss);color:var(--paper);padding:13px 24px;display:flex;
 <body>
 
 <header>
-  <div>
-    <div class="logo">みどりの<span>図鑑</span></div>
-    <div class="logo-sub">MY PERSONAL PLANT JOURNAL</div>
-  </div>
+  <div class="logo">みどりの<span>図鑑</span><span class="logo-sub">MY PLANT JOURNAL</span></div>
   <div class="header-actions">
     <span class="hstat" id="hstat">0件</span>
     <button class="hbtn hbtn-outline" onclick="openTagMgr()">🏷 タグ</button>
